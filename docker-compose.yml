@@ -1,0 +1,21 @@
+# DirMover 单机部署示例：docker compose up -d
+# 迁移的是“容器内路径”，所以需要把宿主机目录挂载进来，
+# 任务里填写的源/目标路径必须是容器内路径（如 /mnt/inbox）。
+services:
+  dirmover:
+    build: .
+    image: dirmover:latest
+    container_name: dirmover
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      TZ: Asia/Shanghai
+      DIRMOVER_DATA: /data
+      DIRMOVER_LOG_DIR: /logs
+    volumes:
+      - ./data:/data
+      - ./logs:/logs
+      # 按需添加宿主机目录（容器内路径要与任务配置一致）
+      # - /path/on/host/inbox:/mnt/inbox
+      # - /path/on/host/archive:/mnt/archive

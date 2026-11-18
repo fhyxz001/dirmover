@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# 运行时数据与日志（保留目录占位）
+data/*
+!data/.gitkeep
+logs/*
+!logs/.gitkeep
+
+# 构建产物与本地冒烟测试
+dist/
+*.tar.gz
+*.zip
+.smoke/
+
+# 编辑器
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

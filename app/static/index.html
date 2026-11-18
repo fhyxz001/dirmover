@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DirMover · 定时目录迁移</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%232563eb'/><path d='M9 13h10l-3-3m3 9H9l3 3' stroke='white' stroke-width='2.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="22" height="22"><rect width="32" height="32" rx="8" fill="currentColor" opacity=".12"/><path d="M9 13h10l-3-3m3 9H9l3 3" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="brand-text">
+        <h1>DirMover</h1>
+        <p>按计划把源目录的内容搬到目标目录</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="btn ghost" id="refreshBtn" title="刷新列表">刷新</button>
+      <button class="btn primary" id="addBtn">＋ 新增任务</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="overview" id="overview" aria-live="polite"></section>
+    <section class="task-list" id="taskList" aria-live="polite"></section>
+    <footer class="foot-note">
+      迁移语义：源目录下一级的全部内容（含隐藏文件）整体移动到目标目录，子目录内部结构不变。
+    </footer>
+  </main>
+
+  <!-- 新增 / 编辑弹窗 -->
+  <div class="modal-mask" id="taskModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <h2 id="modalTitle">新增任务</h2>
+        <button class="icon-btn" type="button" data-close aria-label="关闭">✕</button>
+      </div>
+      <form id="taskForm" class="modal-body" novalidate>
+        <label class="field">
+          <span>任务名称</span>
+          <input name="name" maxlength="100" required placeholder="例如：下载目录归档" autocomplete="off" />
+        </label>
+
+        <div class="field-grid">
+          <label class="field">
+            <span>源目录</span>
+            <input name="source" required placeholder="/mnt/inbox" autocomplete="off" spellcheck="false" />
+          </label>
+          <label class="field">
+            <span>目标目录</span>
+            <input name="target" required placeholder="/mnt/archive" autocomplete="off" spellcheck="false" />
+          </label>
+        </div>
+
+        <div class="field-grid">
+          <label class="field">
+            <span>常用调度</span>
+            <select id="presetSelect">
+              <option value="">自定义</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>cron 表达式</span>
+            <input name="cron" required placeholder="*/5 * * * *" autocomplete="off" spellcheck="false" />
+          </label>
+        </div>
+        <p class="hint">分 时 日 月 周，例如 <code>0 2 * * *</code> 表示每天 02:00；<code>*/5 * * * *</code> 表示每 5 分钟。</p>
+
+        <div class="field-grid">
+          <label class="field">
+            <span>同名冲突</span>
+            <select name="conflict">
+              <option value="skip">跳过（默认）</option>
+              <option value="overwrite">覆盖</option>
+              <option value="rename">重命名</option>
+            </select>
+          </label>
+          <label class="field switch-field">
+            <span>启用任务</span>
+            <span class="switch">
+              <input type="checkbox" name="enabled" checked />
+              <span class="track" aria-hidden="true"></span>
+            </span>
+          </label>
+        </div>
+        <p class="hint" id="conflictHint"></p>
+
+        <div class="modal-foot">
+          <button type="button" class="btn ghost" data-close>取消</button>
+          <button type="submit" class="btn primary" id="saveBtn">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 执行记录弹窗 -->
+  <div class="modal-mask" id="historyModal" hidden>
+    <div class="modal wide" role="dialog" aria-modal="true" aria-labelledby="historyTitle">
+      <div class="modal-head">
+        <h2 id="historyTitle">执行记录</h2>
+        <button class="icon-btn" type="button" data-close aria-label="关闭">✕</button>
+      </div>
+      <div class="modal-body" id="historyBody"></div>
+    </div>
+  </div>
+
+  <div class="toasts" id="toasts" aria-live="assertive"></div>
+  <script src="/app.js"></script>
+</body>
+</html>

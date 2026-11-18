@@ -115,7 +115,7 @@ find "$SOURCE" -mindepth 1 -maxdepth 1 -exec mv -t "$TARGET" -- {} +
 ```bash
 sudo useradd -r -s /usr/sbin/nologin dirmover
 sudo mkdir -p /opt/dirmover /var/lib/dirmover /var/log/dirmover
-sudo rsync -a ./ /opt/dirmover/
+sudo rsync -a --exclude=.venv --exclude=data --exclude=logs ./ /opt/dirmover/
 cd /opt/dirmover && sudo python3 -m venv .venv && sudo .venv/bin/pip install -r requirements.txt
 sudo chown -R dirmover:dirmover /opt/dirmover /var/lib/dirmover /var/log/dirmover
 
@@ -126,6 +126,8 @@ sudo systemctl status dirmover
 ```
 
 需要迁移的目录要保证 `dirmover` 用户有读写权限；按实际路径修改 unit 文件里的 `User` / `WorkingDirectory`。
+
+> 只以**单进程**运行（uvicorn 不要加 `--workers`），否则多个进程会各自启动调度器，导致同一任务被重复触发。
 
 ### 后台方式（无 systemd）
 

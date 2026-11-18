@@ -3,6 +3,7 @@ import os
 import tempfile
 
 _tmp = tempfile.mkdtemp(prefix="dirmover-test-")
-os.environ.setdefault("DIRMOVER_DATA", os.path.join(_tmp, "data"))
-os.environ.setdefault("DIRMOVER_LOG_DIR", os.path.join(_tmp, "logs"))
+# 强制使用临时目录，避免已有环境变量把测试数据写进真实数据目录
+os.environ["DIRMOVER_DATA"] = os.path.join(_tmp, "data")
+os.environ["DIRMOVER_LOG_DIR"] = os.path.join(_tmp, "logs")
 os.environ["DIRMOVER_SCHEDULER"] = "0"

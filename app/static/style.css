@@ -353,9 +353,7 @@ main {
 
 .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
 .field > span { font-size: 12.5px; font-weight: 600; color: var(--muted); }
-.field input[type="text"],
-.field input:not([type]),
-.field input[name],
+.field input:not([type="checkbox"]),
 .field select {
   width: 100%;
   font: inherit;
@@ -367,7 +365,8 @@ main {
   padding: 9px 12px;
   transition: border-color .15s, box-shadow .15s;
 }
-.field input:focus, .field select:focus {
+.field input:not([type="checkbox"]):focus,
+.field select:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);

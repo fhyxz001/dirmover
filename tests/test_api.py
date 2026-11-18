@@ -154,6 +154,26 @@ def test_run_unknown_task_returns_404(client):
     assert client.get("/api/tasks/nope/runs").status_code == 404
 
 
+def test_run_returns_409_when_task_is_locked(client, dirs):
+    """同一任务已有实例在跑时，手动执行返回 409。"""
+    from app import config
+    from app.locks import FileLock
+
+    src, dst = dirs
+    task_id = client.post("/api/tasks", json=payload(src, dst)).json()["id"]
+
+    lock = FileLock(config.LOCK_DIR / f"{task_id}.lock")
+    assert lock.acquire()
+    try:
+        res = client.post(f"/api/tasks/{task_id}/run")
+        assert res.status_code == 409
+    finally:
+        lock.release()
+
+    # 锁释放后可以正常执行
+    assert client.post(f"/api/tasks/{task_id}/run").status_code == 200
+
+
 def test_run_records_validation_failure(client, dirs):
     """任务创建后源目录被删，执行时不应 500，而是记录失败。"""
     import shutil

@@ -103,7 +103,9 @@ function cardHtml(task) {
     const badge = last.ok
       ? '<span class="badge ok">成功</span>'
       : '<span class="badge bad">失败</span>';
-    const counts = `移动 ${last.moved_entries} 项` + (last.skipped ? ` · 跳过 ${last.skipped}` : "");
+    let counts = `移动 ${last.moved_entries} 项（${last.files} 文件）`;
+    if (last.skipped) counts += ` · 跳过 ${last.skipped}`;
+    if (!last.ok && last.failures) counts += ` · ${last.failures} 项失败`;
     lastHtml = `${badge}<span title="${escapeHtml(fmtDate(last.at))}">${relTime(last.at)} · ${counts}</span>`;
   }
 

@@ -131,6 +131,8 @@ def update_task(task_id: str, payload: TaskPayload):
         raise HTTPException(status_code=404, detail="任务不存在")
     data = _clean_payload(payload)
     task = store.update_task(task_id, **data)
+    if task is None:
+        raise HTTPException(status_code=404, detail="任务不存在")
     scheduler.sync(task)  # 修改 cron / 启停后立即生效
     logger.info("更新任务「%s」：cron=%s，enabled=%s", task["name"], task["cron"], task["enabled"])
     return _task_view(task)
@@ -150,6 +152,8 @@ def toggle_task(task_id: str, payload: TogglePayload):
     if store.get_task(task_id) is None:
         raise HTTPException(status_code=404, detail="任务不存在")
     task = store.update_task(task_id, enabled=payload.enabled)
+    if task is None:
+        raise HTTPException(status_code=404, detail="任务不存在")
     scheduler.sync(task)
     logger.info("%s任务「%s」", "启用" if payload.enabled else "禁用", task["name"])
     return _task_view(task)
@@ -166,7 +170,9 @@ def run_task(task_id: str, payload: RunPayload | None = None):
         raise HTTPException(status_code=404, detail="任务不存在") from exc
     except TaskBusy as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
-    return {"run": run, "task": _task_view(store.get_task(task_id))}
+    task = store.get_task(task_id)
+    # 执行期间任务可能被删除，此时只返回执行结果
+    return {"run": run, "task": _task_view(task) if task else None}
 
 
 @app.get("/api/tasks/{task_id}/runs")
